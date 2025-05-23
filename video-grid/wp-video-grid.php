@@ -5,7 +5,7 @@
  * Author URI:http://www.i13websolution.com
  * Description:This is beautiful responsive video grid with responsive lightbox.Add any number of video from admin panel. 
  * Author:I Thirteen Web Solution 
- * Version:1.23
+ * Version:1.24
  * Text Domain:video-grid
  */
 
@@ -1183,6 +1183,10 @@ function video_grid_with_lightbox_video_management_func() {
 
                                                                $ext='gif'; 
                                                             } 
+                                                            else if (exif_imagetype($HdnMediaSelection) == IMAGETYPE_WEBP) {
+
+                                                               $ext='webp'; 
+                                                            } 
 
                                                          }
 							$imagename = $vid . '_big.' . $ext;
@@ -1261,6 +1265,10 @@ function video_grid_with_lightbox_video_management_func() {
                                                    else if (exif_imagetype($HdnMediaSelection) == IMAGETYPE_GIF) {
                                                    
                                                       $ext='gif'; 
+                                                   } 
+                                                   else if (exif_imagetype($HdnMediaSelection) == IMAGETYPE_WEBP) {
+                                                   
+                                                      $ext='webp'; 
                                                    } 
                                                     
                                                 }
@@ -1680,6 +1688,7 @@ function video_grid_with_lightbox_video_management_func() {
                                                                             validExtensions[1] = 'jpeg';
                                                                             validExtensions[2] = 'png';
                                                                             validExtensions[3] = 'gif';
+                                                                            validExtensions[4] = 'webp';
 
                                                                             var inarr = parseInt(jQuery.inArray(attachment.subtype, validExtensions));
                                                                               if (inarr > 0 && attachment.type.toLowerCase() == 'image'){
