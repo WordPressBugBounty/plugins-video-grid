@@ -3,7 +3,7 @@ Contributors:nik00726
 Donate link:http://www.i13websolution.com/donate-wordpress_image_thumbnail.php
 Tags:wordpress video grid lightbox,wordpress youtube grid,wordpress responsive vimeo grid,wordpress lightbox video gallery,wordpress video grid,wordpress metacafe grid,wordpress dailymotion grid,Responsive Video Grid
 Requires at least:3.5
-Tested up to:6.8
+Tested up to:6.9
 Version:1.24
 Stable tag:1.24
 License:GPLv2 or later
