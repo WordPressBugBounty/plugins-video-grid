@@ -1,0 +1,15 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "i13-rvg/video-grid",
+	"version": "1.25",
+	"title": "Video Grid",
+	"category": "widgets",
+	"icon": "format-video",
+	"description": "Display your responsive video grid with lightbox.",
+	"keywords": [ "video", "grid", "gallery", "lightbox", "youtube" ],
+	"textdomain": "video-grid",
+	"editorScript": "file:./build/index.js",
+	"render": "file:./render.php",
+	"supports": { "html": false, "align": [ "wide", "full" ] }
+}

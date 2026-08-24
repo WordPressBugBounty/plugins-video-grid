@@ -1,112 +1,87 @@
 === Video Grid ===
 Contributors:nik00726
 Donate link:http://www.i13websolution.com/donate-wordpress_image_thumbnail.php
-Tags:wordpress video grid lightbox,wordpress youtube grid,wordpress responsive vimeo grid,wordpress lightbox video gallery,wordpress video grid,wordpress metacafe grid,wordpress dailymotion grid,Responsive Video Grid
+Tags:video grid,youtube grid,video gallery,gutenberg block,vimeo grid
 Requires at least:3.5
-Tested up to:6.9
-Version:1.24
-Stable tag:1.24
+Tested up to:7.1
+Version:1.25
+Stable tag:1.25
 License:GPLv2 or later
 License URI:http://www.gnu.org/licenses/gpl-2.0.html
+
 == Description ==
 
+**Display YouTube, Vimeo and DailyMotion videos in a beautiful, fully responsive video grid with a pop-up lightbox — no coding required.**
 
-This is a beautiful responsive video grid with responsive lightbox for WordPress blogs and sites. Admin can manage any number of videos into the grid.
-Admin can add, edit and delete videos.admin can set video title to lightbox. Before add grid, to WordPress blog, admin can preview a video grid. Admin can set video background. Admin can also set if you want to play video into a lightbox or redirect to the respective site. The free version only supports youtube and Dailymotion. Pro version can support Youtube, Vimeo, Metacafe, DailyMotion, and custom HTML 5 Video
+Video Grid is a free WordPress video grid plugin that turns a list of video links into a clean, responsive grid your visitors can watch in a modern lightbox, without ever leaving your page. Just paste a video URL and the plugin automatically fetches the thumbnail, title and description for you.
 
+Add, edit, reorder and preview your grid from the admin panel, then place it anywhere with a simple shortcode or the native **Gutenberg block** — it works with any theme.
 
+[youtube https://www.youtube.com/watch?v=SbQEswn2JBY]
 
-**Find WordPress Video Grid Pro Plugin (Unlimited Video Grids+Much more fatures) at [WordPress Video Grid Pro Plugin](https://www.i13websolution.com/product/wordpress-responsive-video-grid-pro/)**
+**[View the Live Demo](http://blog.i13websolution.com/live-preview-wordpress-video-grid/)**
 
-**[Live Demo WordPress Video Grid ](http://blog.i13websolution.com/live-preview-wordpress-video-grid/)**
+= Why choose Video Grid? =
 
-**[WordPress Video Grid Pro Video](https://www.youtube.com/watch?v=SbQEswn2JBY)**
+* **Paste a link, done** — thumbnail, title and description are fetched automatically for YouTube, Vimeo and DailyMotion.
+* **Watch in a lightbox** — visitors play videos in a responsive pop-up player instead of being redirected away from your site.
+* **Modern or classic** — choose the new lightweight modern grid and lightbox engines (fast, responsive, no jQuery), or keep the classic ones. Existing sites are never changed on upgrade.
+* **Gutenberg block included** — build your grid right inside the block editor, no shortcode needed.
+* **Fully responsive** — the grid and lightbox look great on desktop, tablet and mobile.
+* **No ads in your grids** — clean output on your site.
 
-https://www.youtube.com/watch?v=SbQEswn2JBY
+= Free features =
 
+* Add any number of videos to a grid
+* Supports **YouTube, Vimeo and DailyMotion**
+* Responsive video grid and responsive lightbox
+* New **modern lightbox engine** — lightweight, no jQuery (classic lightbox still available)
+* New **modern grid engine** — CSS grid, centered, responsive columns (classic layout still available)
+* Native **Gutenberg block** for the block editor
+* Add, edit and delete videos
+* Preview your grid before you publish it
+* Play video in a lightbox, or redirect to the source site
+* Optional captions on thumbnails
+* Change the grid background
+* Simple shortcode for pages, posts and themes
+* WordPress capabilities (roles/permissions) support
 
-**Please rate this plugin if you find it useful**
+= Upgrade to Video Grid Pro =
 
+Need more power? **[Video Grid Pro](https://www.i13websolution.com/product/wordpress-responsive-video-grid-pro/)** adds everything the free version doesn't — for a one-time price, with no annual fee:
 
-**=Features=**
+* **Unlimited video grids** — show different grids on different pages
+* **Three grid layouts** — Standard, **Masonry** (Pinterest-style) and **Justified** (edge-to-edge rows)
+* **Bulk import** an entire **YouTube channel or playlist** in one click
+* **Metacafe and self-hosted HTML5 video** support (in addition to YouTube, Vimeo, DailyMotion)
+* **Elementor widget and Divi module** — plus the Gutenberg block
+* Custom thumbnail width and height, custom or one-click thumbnail download
+* Video description inside the lightbox
+* Left / center / right grid alignment, with matching pagination
+* AJAX pagination with a custom page size
+* Manual video ordering with mass order updates, and random order
+* Open videos in the lightbox or a new browser tab
+* Priority support and no advertisements
 
+**[Get Video Grid Pro →](https://www.i13websolution.com/product/wordpress-responsive-video-grid-pro/)**
 
-1. Add any number of video to grid.
-
-2. grid and lightbox both are responsive
-
-3. Edit video.
-
-4. Preview your video grid before use it.
-
-6. grid installation into theme is simple just add shortcode to theme or pages/posts.
-
-7. changes to video backgroud.
-
-8. play video into lightbox or redirect.
-
-9. grid can have caption.
-
-10.WordPress capebilities feature.
-
-
-**=Pro Version Features=**
-
-
-1. Unlimited Video Grids and lightbox(Multiple Video Grids).
-
-2. Custom height width of thumbnail.
-
-3. Support video types Youtube,Vimeo,Metacafe,DailyMotion, Support custom html 5 videos.
-
-4. Use custome video thumbnail Or oneclick video thumbnail image download.
-
-5. Display video description into lightbox.
-
-6. On/Off Video thumbnail captions.
-
-7. Set pagination size and use ajax pagination.
-
-8. Admin can display video gallery according video order.
-
-9. Mass video order updates.
-
-10. Sort by random videos
-
-11. Open video into lightbox or new browser tab.
-
-12. Responsive Admin Layout.
-
-13. No advertisements.
-
-14. WordPress capebilities feature.
-
-
-[Get Support](http://www.i13websolution.com/contacts)
-
+**Please rate this plugin if you find it useful — it really helps.**
 
 == Installation ==
 
-This plugin is easy to install like other plug-ins of Wordpress as you need to just follow the below mentioned steps:
+This plugin installs like any other WordPress plugin:
 
-1. upload video-grid folder to wp-Content/plugins folder.
+1. Upload the video-grid folder to the wp-content/plugins folder (or install it from Plugins > Add New in your dashboard).
+2. Activate the plugin from the Dashboard / Plugins window.
+3. The plugin is now active — see the Usage section below.
 
-2. Activate the plugin from Dashboard / Plugins window.
+= Usage =
 
-4. Now Plugin is Activated, Go to the Usage section to see how to use wordpress thumbnail slider.
-
-### Usage ###
-
-1.Use of wordpress responsive video grid is easy after activating plugin go to Video Grid with Lightbox menu.
-
-2.You can manage video by Manage videos menu.
-
-3.You can set settings for this plugin using Grid settings menu.
-
-4.You can add this slider to your wordpress page/post by adding this shortcode to [print_responsive_video_grid]
-
-OR you can add this to your theme by adding this code echo do_shortcode('[print_responsive_video_grid]'); to your theme
-
+1. After activating, go to the **Video Grid with Lightbox** menu.
+2. Add your videos under **Manage Videos** (paste a YouTube, Vimeo or DailyMotion link — the thumbnail, title and description are fetched automatically).
+3. Configure your grid under **Grid Settings**, and preview it before publishing.
+4. Add the grid to a page or post using the **Video Grid** block, or the shortcode [print_responsive_video_grid].
+   To add it in a theme template, use: echo do_shortcode('[print_responsive_video_grid]');
 
 == Screenshots ==
 
@@ -121,17 +96,28 @@ OR you can add this to your theme by adding this code echo do_shortcode('[print_
 9. PRO Version Add Video
 10. PRO Version video Grid
 11. PRO Version Responsive Grid
-
-
+12. Modern Popup layout
+13. Pro Version Justified layout
+14. Pro Version masonry layout
+15. Block Editor
 
 
 == License ==
 
-This plugin is free for everyone! Since it's released under the GPL, you can use it free of charge on your personal or commercial blog. But you can make some donations if you realy find it useful.
-
+This plugin is free for everyone! Since it's released under the GPL, you can use it free of charge on your personal or commercial blog. If you find it useful, a donation is always appreciated.
 
 
 == Changelog ==
+
+= 1.25 =
+
+* Added Vimeo support to the free version.
+* Added a new modern lightbox engine option (lightweight, no jQuery); existing sites keep the original lightbox.
+* Added a new modern grid layout engine option (CSS grid, centers properly, responsive columns); existing sites keep the original layout.
+* Added a native Gutenberg block — add your video grid from the block editor.
+* Added an icon to the admin menu.
+* Replaced third-party ads in the admin side panel with Pro version information.
+* Added a review request notice.
 
 = 1.24 =
 
@@ -305,6 +291,30 @@ This plugin is free for everyone! Since it's released under the GPL, you can use
 
 == Frequently asked questions ==
 
-1.How to use ?
+= How do I use it? =
 
-For More info use readme installation and usage notes.
+After activating, go to the Video Grid with Lightbox menu, add your videos under Manage Videos (just paste a video link), configure the grid under Grid Settings, then add it to a page or post using the Video Grid block or the [print_responsive_video_grid] shortcode. See the Installation and Usage sections above for details.
+
+= Which video sites does the free version support? =
+
+The free version supports YouTube, Vimeo and DailyMotion. The Pro version adds Metacafe and self-hosted HTML5 video.
+
+= Do I have to add videos one at a time? =
+
+In the free version, yes. Video Grid Pro can bulk-import an entire YouTube channel or playlist in one click.
+
+= Can I have more than one grid? =
+
+The free version includes one grid. Video Grid Pro supports unlimited grids, so you can show different videos on different pages.
+
+= Does it work with the block editor? =
+
+Yes. The free version includes a native Gutenberg block. Video Grid Pro adds an Elementor widget and a Divi module as well.
+
+= Will upgrading change how my existing grid looks? =
+
+No. The new modern grid and lightbox engines are opt-in — existing sites keep their current appearance until you choose to switch.
+
+= What does the Pro version add? =
+
+Unlimited grids, three layouts (Standard, Masonry and Justified), YouTube channel/playlist bulk import, Metacafe and HTML5 video, Elementor and Divi support, custom thumbnail sizes, AJAX pagination, alignment controls and more. See [Video Grid Pro](https://www.i13websolution.com/product/wordpress-responsive-video-grid-pro/).

@@ -5,7 +5,7 @@
  * Author URI:http://www.i13websolution.com
  * Description:This is beautiful responsive video grid with responsive lightbox.Add any number of video from admin panel. 
  * Author:I Thirteen Web Solution 
- * Version:1.24
+ * Version:1.25
  * Text Domain:video-grid
  */
 
@@ -17,7 +17,115 @@ register_deactivation_hook(__FILE__,'rvg_video_grid_remove_access_capabilities')
 
 add_action ( 'wp_enqueue_scripts', 'responsive_video_grid_load_styles_and_js' );
 add_shortcode ( 'print_responsive_video_grid', 'print_responsive_video_grid_func' );
+
+// Native Gutenberg block (free version has a single video grid).
+require_once plugin_dir_path( __FILE__ ) . 'blocks/block-loader.php';
+
+/**
+ * Sidebar Pro upgrade box (i13 house style: gold border, star header, icon
+ * benefit rows, orange CTA). Replaces the old third-party affiliate ad boxes.
+ */
+function rvg_free_pro_sidebar_box() {
+	$url = 'https://www.i13websolution.com/product/wordpress-responsive-video-grid-pro/';
+	$benefits = array(
+		array( '🎬', __( 'Self-hosted HTML5 video support', 'video-grid' ) ),
+		array( '🗂️', __( 'Unlimited video grids', 'video-grid' ) ),
+		array( '🖼️', __( 'Custom thumbnails & captions', 'video-grid' ) ),
+		array( '↕️', __( 'Video ordering & AJAX pagination', 'video-grid' ) ),
+		array( '⚡', __( 'No ads, responsive admin & more', 'video-grid' ) ),
+	);
+	?>
+	<div style="border:2px solid #f0a500;border-radius:10px;padding:18px 18px 20px;background:#fff;max-width:320px;margin:0 0 18px;">
+		<div style="font-size:17px;font-weight:700;color:#222;margin-bottom:14px;">
+			<span style="color:#f0a500;">&#9733;</span> <?php echo esc_html__( 'Upgrade to PRO', 'video-grid' ); ?>
+		</div>
+		<?php foreach ( $benefits as $b ) : ?>
+			<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;font-size:13.5px;color:#3c434a;line-height:1.4;">
+				<span style="font-size:15px;line-height:1.3;"><?php echo $b[0]; ?></span>
+				<span><?php echo esc_html( $b[1] ); ?></span>
+			</div>
+		<?php endforeach; ?>
+		<a target="_blank" rel="noopener" href="<?php echo esc_url( $url ); ?>"
+			style="display:block;text-align:center;background:#f0a500;color:#fff;text-decoration:none;font-weight:700;font-size:15px;padding:13px 16px;border-radius:7px;margin-top:16px;">
+			<?php echo esc_html__( 'Get PRO Version', 'video-grid' ); ?> &rarr;
+		</a>
+	</div>
+	<?php
+}
 add_action ( 'admin_notices', 'responsive_video_grid_admin_notices' );
+
+/**
+ * Show a friendly, dismissible review request on the plugin's admin pages,
+ * but only after the user has had the plugin for a week (so it reaches people
+ * who actually use it). Never nags: "already did" hides it forever, "later"
+ * snoozes for two weeks.
+ */
+function rvg_review_request_notice() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+	// Only on this plugin's admin screens.
+	$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+	if ( strpos( $page, 'video_grid_with_lightbox' ) === false ) {
+		return;
+	}
+	if ( get_option( 'rvg_review_done' ) ) {
+		return;
+	}
+	$snooze = (int) get_option( 'rvg_review_snooze', 0 );
+	if ( $snooze && time() < $snooze ) {
+		return;
+	}
+	$first = (int) get_option( 'rvg_first_activated', 0 );
+	if ( ! $first ) {
+		add_option( 'rvg_first_activated', time() );
+		return; // start the clock now for existing installs.
+	}
+	if ( time() - $first < 7 * DAY_IN_SECONDS ) {
+		return; // wait a week.
+	}
+
+	$review_url  = 'https://wordpress.org/support/plugin/video-grid/reviews/#new-post';
+	$dismiss_url = wp_nonce_url( add_query_arg( 'rvg_review', 'done' ), 'rvg_review_action', 'rvg_review_nonce' );
+	$later_url   = wp_nonce_url( add_query_arg( 'rvg_review', 'later' ), 'rvg_review_action', 'rvg_review_nonce' );
+	?>
+	<div class="notice notice-info" style="border-left-color:#f0a500;padding:14px 16px;">
+		<p style="font-size:14px;margin:0 0 6px;">
+			<strong><?php echo esc_html__( 'Enjoying Video Grid?', 'video-grid' ); ?></strong>
+			<?php echo esc_html__( 'A quick review on WordPress.org would mean a lot and helps others find the plugin.', 'video-grid' ); ?>
+		</p>
+		<p style="margin:6px 0 0;">
+			<a href="<?php echo esc_url( $review_url ); ?>" target="_blank" rel="noopener" class="button button-primary" style="background:#f0a500;border-color:#f0a500;"><?php echo esc_html__( 'Leave a review', 'video-grid' ); ?></a>
+			&nbsp;
+			<a href="<?php echo esc_url( $dismiss_url ); ?>" class="button"><?php echo esc_html__( 'I already did', 'video-grid' ); ?></a>
+			&nbsp;
+			<a href="<?php echo esc_url( $later_url ); ?>" style="text-decoration:none;color:#787c82;"><?php echo esc_html__( 'Maybe later', 'video-grid' ); ?></a>
+		</p>
+	</div>
+	<?php
+}
+add_action( 'admin_notices', 'rvg_review_request_notice' );
+
+/**
+ * Handle the review-notice actions (dismiss forever / snooze two weeks).
+ */
+function rvg_review_handle_action() {
+	if ( ! isset( $_GET['rvg_review'] ) ) {
+		return;
+	}
+	if ( ! isset( $_GET['rvg_review_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['rvg_review_nonce'] ) ), 'rvg_review_action' ) ) {
+		return;
+	}
+	$action = sanitize_text_field( wp_unslash( $_GET['rvg_review'] ) );
+	if ( 'done' === $action ) {
+		update_option( 'rvg_review_done', 1 );
+	} elseif ( 'later' === $action ) {
+		update_option( 'rvg_review_snooze', time() + 14 * DAY_IN_SECONDS );
+	}
+	wp_safe_redirect( remove_query_arg( array( 'rvg_review', 'rvg_review_nonce' ) ) );
+	exit;
+}
+add_action( 'admin_init', 'rvg_review_handle_action' );
 
 add_action( 'wp_ajax_check_file_exist_grid', 'check_file_exist_grid_callback' );
 add_action( 'wp_ajax_get_youtube_info_grid', 'get_youtube_info_grid_callback' );
@@ -347,12 +455,21 @@ function responsive_video_grid_load_styles_and_js() {
                 wp_register_style('vl-box-grid-css', plugins_url('/css/vl-box-grid-css.css', __FILE__),array(),'1.11');
                 wp_register_script('vl-grid-js', plugins_url('/js/vl-grid-js.js', __FILE__),array('jquery'),'1.11');
                 wp_register_script('v_grid', plugins_url('/js/v_grid.js', __FILE__),array('jquery'),'1.11');
+                // Modern, dependency-free lightbox engine (optional; legacy kept for existing sites).
+                wp_register_style('rvg-lightbox-css', plugins_url('/css/rvg-lightbox.css', __FILE__),array(),'1.0.26');
+                wp_register_script('rvg-lightbox-js', plugins_url('/js/rvg-lightbox.js', __FILE__),array(),'1.0.26',true);
+                // Modern CSS-Grid layout engine (optional; legacy jQuery layout kept for existing sites).
+                wp_register_style('rvg-modern-grid-css', plugins_url('/css/rvg-modern-grid.css', __FILE__),array(),'1.25.1');
 
                 
 	}
 }
 function install_responsive_video_grid() {
 	global $wpdb;
+	// Record first-activation time (used to delay the review request).
+	if ( ! get_option( 'rvg_first_activated' ) ) {
+		add_option( 'rvg_first_activated', time() );
+	}
 	$table_name = $wpdb->prefix . "responsive_video_grid";
 	
 	$sql = "CREATE TABLE " . $table_name . " (
@@ -378,7 +495,11 @@ function install_responsive_video_grid() {
          $responsive_video_grid_settings=array(
                                                     'display_video_lightbox' => '1',
                                                     'scollerBackground'=>'#FFFFFF',
-                                                      'resize_images'=>'1'
+                                                      'resize_images'=>'1',
+                                                    'lightbox_engine'=>'modern',
+                                                    'grid_engine'=>'modern',
+                                                    'thumb_min_width'=>'260',
+                                                    'thumb_min_height'=>'160'
                                                     
                                                 );
                
@@ -423,7 +544,7 @@ function install_responsive_video_grid() {
 
 function responsive_video_grid_add_admin_menu() {
     
-	$hook_suffix=add_menu_page ( __ ( 'Video Grid Plus Lightbox','video-grid' ), __ ( 'Video Grid With Lightbox','video-grid' ), 'rvg_video_grid_settings', 'video_grid_with_lightbox', 'video_grid_with_lightbox_admin_options_func' );
+	$hook_suffix=add_menu_page ( __ ( 'Video Grid Plus Lightbox','video-grid' ), __ ( 'Video Grid With Lightbox','video-grid' ), 'rvg_video_grid_settings', 'video_grid_with_lightbox', 'video_grid_with_lightbox_admin_options_func', 'dashicons-format-video' );
 	$hook_suffix=add_submenu_page ( 'video_grid_with_lightbox', __ ( 'Gallery Settings','video-grid' ), __ ( 'Gallery Settings','video-grid' ), 'rvg_video_grid_settings', 'video_grid_with_lightbox', 'video_grid_with_lightbox_admin_options_func' );
 	$hook_suffix_image=add_submenu_page ( 'video_grid_with_lightbox', __ ( 'Manage Videos','video-grid' ), __ ( 'Manage Videos','video-grid' ), 'rvg_video_grid_view_videos', 'video_grid_with_lightbox_video_management', 'video_grid_with_lightbox_video_management_func' );
 	$hook_suffix_prev=add_submenu_page ( 'video_grid_with_lightbox', __ ( 'Preview Gallery','video-grid' ), __ ( 'Preview Gallery','video-grid' ), 'rvg_video_grid_preview', 'video_grid_with_lightbox_video_preview', 'video_grid_with_lightbox_video_preview_func' );
@@ -473,12 +594,22 @@ function responsive_video_grid_add_admin_init() {
          
          $scollerBackground=trim(htmlentities(sanitize_text_field($_POST['scollerBackground']),ENT_QUOTES));
          $resize_images = htmlentities(sanitize_text_field($_POST['resize_images']),ENT_QUOTES);
+         $lightbox_engine = (isset($_POST['lightbox_engine']) && $_POST['lightbox_engine']=='legacy') ? 'legacy' : 'modern';
+         $grid_engine = (isset($_POST['grid_engine']) && $_POST['grid_engine']=='legacy') ? 'legacy' : 'modern';
+         $thumb_min_width = isset($_POST['thumb_min_width']) ? intval($_POST['thumb_min_width']) : 260;
+         if ($thumb_min_width < 80) { $thumb_min_width = 80; }
+         $thumb_min_height = isset($_POST['thumb_min_height']) ? intval($_POST['thumb_min_height']) : 160;
+         if ($thumb_min_height < 60) { $thumb_min_height = 60; }
                            
          
          $options=array();
          $options['display_video_lightbox']=$display_video_lightbox;  
          $options['scollerBackground']=$scollerBackground;  
          $options['resize_images']=$resize_images;  
+         $options['lightbox_engine']=$lightbox_engine;  
+         $options['grid_engine']=$grid_engine;  
+         $options['thumb_min_width']=$thumb_min_width;  
+         $options['thumb_min_height']=$thumb_min_height;  
         
          
          $settings=update_option('responsive_video_grid_settings',$options); 
@@ -515,14 +646,8 @@ function responsive_video_grid_add_admin_init() {
                               fjs.parentNode.insertBefore(js, fjs);
                             }(document, 'script', 'facebook-jssdk'));</script>
                       </td>
-                      <td>
-                          <a target="_blank" title="Donate" href="https://www.i13websolution.com/donate-wordpress_image_thumbnail.php">
-                              <img id="<?php echo __( 'help us for free plugin','video-grid');?>" height="30" width="90" src="<?php echo plugins_url( 'images/paypaldonate.jpg', __FILE__ ) ;?>" border="0" alt="<?php echo __( 'help us for free plugin','video-grid');?>" title="<?php echo __( 'help us for free plugin','video-grid');?>">
-                          </a>
-                      </td>
                   </tr>
               </table>
-                <span><h3 style="color: blue;"><a target="_blank" href="https://www.i13websolution.com/wordpress-responsive-video-grid-pro.html"><?php echo __( 'UPGRADE TO PRO VERSION','video-grid');?></a></h3></span>
               <?php
                   $messages=get_option('responsive_video_grid_messages'); 
                   $type='';
@@ -610,6 +735,54 @@ function responsive_video_grid_add_admin_init() {
                                     <div style="clear: both"></div>
                             </div>
                     </div>
+                              <div class="stuffbox" id="lightboxenginediv" style="width: 100%;">
+                            <h3>
+                                    <label><?php echo __('Lightbox engine','video-grid');?></label>
+                            </h3>
+                            <div class="inside">
+                                    <table>
+                                            <tr>
+                                                    <td>
+                                                        <?php $vg_engine = isset($settings['lightbox_engine']) ? $settings['lightbox_engine'] : 'legacy'; ?>
+                                                        <input style="width: 20px;" type="radio" id="lightbox_engine_modern" name="lightbox_engine" value="modern" <?php if($vg_engine=='modern'){echo "checked='checked'";} ?>>&nbsp;<label for="lightbox_engine_modern"><?php echo __('Modern (recommended) - lightweight, no jQuery needed, stops video on close','video-grid');?></label>
+                                                        <div style="clear: both"></div>
+                                                        <input style="width: 20px;" type="radio" id="lightbox_engine_legacy" name="lightbox_engine" value="legacy" <?php if($vg_engine=='legacy'){echo "checked='checked'";} ?>>&nbsp;<label for="lightbox_engine_legacy"><?php echo __('Legacy (FancyBox) - the original lightbox, kept for existing sites','video-grid');?></label>
+                                                        <div style="clear: both"></div>
+                                                    </td>
+                                            </tr>
+                                    </table>
+                                    <div style="clear: both"></div>
+                            </div>
+                    </div>
+                              <div class="stuffbox" id="gridenginediv" style="width: 100%;">
+                            <h3>
+                                    <label><?php echo __('Grid layout engine','video-grid');?></label>
+                            </h3>
+                            <div class="inside">
+                                    <table>
+                                            <tr>
+                                                    <td>
+                                                        <?php $vg_grid_engine = isset($settings['grid_engine']) ? $settings['grid_engine'] : 'legacy'; ?>
+                                                        <input style="width: 20px;" type="radio" id="grid_engine_modern" name="grid_engine" value="modern" <?php if($vg_grid_engine=='modern'){echo "checked='checked'";} ?>>&nbsp;<label for="grid_engine_modern"><?php echo __('Modern (recommended) - CSS grid, centers properly, responsive columns, no jQuery','video-grid');?></label>
+                                                        <div style="clear: both"></div>
+                                                        <input style="width: 20px;" type="radio" id="grid_engine_legacy" name="grid_engine" value="legacy" <?php if($vg_grid_engine=='legacy'){echo "checked='checked'";} ?>>&nbsp;<label for="grid_engine_legacy"><?php echo __('Legacy - the original layout, kept for existing sites','video-grid');?></label>
+                                                        <div style="clear: both"></div>
+                                                        <?php $vg_tmw = isset($settings['thumb_min_width']) ? intval($settings['thumb_min_width']) : 260; $vg_tmh = isset($settings['thumb_min_height']) ? intval($settings['thumb_min_height']) : 160; ?>
+                                                        <div id="rvg_thumb_size_fields" style="margin-top:10px;<?php echo ($vg_grid_engine === 'modern') ? '' : 'display:none;'; ?>">
+                                                            <label style="display:inline-block;min-width:170px;"><?php echo __('Min thumbnail width (px)','video-grid');?></label>
+                                                            <input type="number" min="80" max="800" name="thumb_min_width" value="<?php echo esc_attr($vg_tmw); ?>" style="width:90px;">
+                                                            <div style="clear: both"></div>
+                                                            <label style="display:inline-block;min-width:170px;margin-top:6px;"><?php echo __('Min thumbnail height (px)','video-grid');?></label>
+                                                            <input type="number" min="60" max="600" name="thumb_min_height" value="<?php echo esc_attr($vg_tmh); ?>" style="width:90px;">
+                                                            <div style="clear: both"></div>
+                                                            <small style="color:#787c82;"><?php echo __('Applies to the Modern grid engine. Larger width = fewer, bigger columns.','video-grid');?></small>
+                                                        </div>
+                                                    </td>
+                                            </tr>
+                                    </table>
+                                    <div style="clear: both"></div>
+                            </div>
+                    </div>
                                <?php wp_nonce_field('action_image_add_edit', 'add_edit_image_nonce'); ?>   
                               <input type="submit"  name="btnsave" id="btnsave" value="<?php echo __( 'Save Changes','video-grid');?>" class="button-primary">&nbsp;&nbsp;<input type="button" name="cancle" id="cancle" value="<?php echo __( 'Cancle','video-grid');?>" class="button-primary" onclick="location.href='admin.php?page=video_grid_with_lightbox_video_management'">
 
@@ -617,6 +790,17 @@ function responsive_video_grid_add_admin_init() {
                           <script type="text/javascript">
 
                               jQuery(document).ready(function() {
+
+                                      // Show thumbnail size fields only for the Modern grid engine.
+                                      function rvgToggleThumbFields(){
+                                          if (jQuery("#grid_engine_modern").is(":checked")) {
+                                              jQuery("#rvg_thumb_size_fields").show();
+                                          } else {
+                                              jQuery("#rvg_thumb_size_fields").hide();
+                                          }
+                                      }
+                                      rvgToggleThumbFields();
+                                      jQuery("input[name='grid_engine']").on('change', rvgToggleThumbFields);
 
                                       jQuery("#scrollersettiings").validate({
                                               rules: {
@@ -646,30 +830,7 @@ function responsive_video_grid_add_admin_init() {
           </div>      
       </div>
  <div id="postbox-container-1" class="postbox-container" > 
-
-          <div class="postbox"> 
-              <h3 class="hndle"><span></span><?php echo __( 'Access All Themes In One Price','video-grid');?></h3> 
-              <div class="inside">
-                  <center><a href="https://www.elegantthemes.com/affiliates/idevaffiliate.php?id=11715_0_1_10" target="_blank">
-                          <img border="0" src="<?php echo plugins_url( 'images/300x250.gif', __FILE__);?>" width="250" height="250">
-                      </a></center>
-
-                  <div style="margin:10px 5px">
-
-                  </div>
-              </div></div>
-              <div class="postbox"> 
-                <h3 class="hndle"><span></span><?php echo __('Google For Business Coupon','video-grid');?></h3> 
-                    <div class="inside">
-                        <center><a href="https://goo.gl/OJBuHT" target="_blank">
-                                <img src="<?php echo plugins_url( 'images/g-suite-promo-code-4.png', __FILE__ );?>" width="250" height="250" border="0">
-                            </a></center>
-                        <div style="margin:10px 5px">
-                        </div>
-                    </div>
-                    
-                </div>
-
+          <?php rvg_free_pro_sidebar_box(); ?>
       </div>      
      
      <div class="clear"></div>
@@ -729,7 +890,6 @@ function video_grid_with_lightbox_video_management_func() {
          <div id="post-body" class="metabox-holder columns-2" >  
           <div id="post-body-content">
           <div class="wrap">
-                <span><h3 style="color: blue;"><a target="_blank" href="https://www.i13websolution.com/wordpress-responsive-video-grid-pro.html"><?php echo __( 'UPGRADE TO PRO VERSION','video-grid');?></a></h3></span>
                 <div style="width: 100%;">
 			<div style="float: left; width: 100%;">
 				<div class="icon32 icon32-posts-post" id="icon-edit">
@@ -1042,30 +1202,7 @@ function video_grid_with_lightbox_video_management_func() {
           </div>
           </div>
              <div id="postbox-container-1" class="postbox-container" > 
-
-          <div class="postbox"> 
-              <h3 class="hndle"><span></span><?php echo __( 'Access All Themes In One Price','video-grid');?></h3> 
-              <div class="inside">
-                  <center><a href="http://www.elegantthemes.com/affiliates/idevaffiliate.php?id=11715_0_1_10" target="_blank">
-                          <img border="0" src="<?php echo plugins_url( 'images/300x250.gif', __FILE__ );?>" width="250" height="250">
-                      </a></center>
-
-                  <div style="margin:10px 5px">
-
-                  </div>
-              </div></div>
-            <div class="postbox"> 
-                <h3 class="hndle"><span></span><?php echo __('Google For Business Coupon','video-grid');?></h3> 
-                    <div class="inside">
-                        <center><a href="https://goo.gl/OJBuHT" target="_blank">
-                                <img src="<?php echo plugins_url( 'images/g-suite-promo-code-4.png', __FILE__ );?>" width="250" height="250" border="0">
-                            </a></center>
-                        <div style="margin:10px 5px">
-                        </div>
-                    </div>
-                    
-                </div>
-
+          <?php rvg_free_pro_sidebar_box(); ?>
       </div> 
     </div>
    </div>                
@@ -1130,6 +1267,25 @@ function video_grid_with_lightbox_video_management_func() {
                                 
 				$embed_url="//www.dailymotion.com/embed/video/$vid";
 				
+			}
+			else if($vtype=='vimeo'){
+
+				// Vimeo URLs are typically vimeo.com/{id}; the id is the last
+				// numeric path segment (handles channel/showcase URLs too).
+				$url_arr = parse_url($videourl);
+				$vid = 0;
+				if (is_array($url_arr) and isset($url_arr['path'])) {
+					$segments = array_reverse(array_filter(explode('/', $url_arr['path'])));
+					foreach ($segments as $segment) {
+						if (is_numeric($segment)) {
+							$vid = $segment;
+							break;
+						}
+					}
+				}
+
+				$embed_url="//player.vimeo.com/video/$vid";
+
 			}
 			
 			
@@ -1391,12 +1547,6 @@ function video_grid_with_lightbox_video_management_func() {
                                  } 
                                  
                                  ?>
-                         <div style="clear:both">
-                            <span><h3 style="color: blue;">
-                                    <a target="_blank" href="https://www.i13websolution.com/wordpress-responsive-video-grid-pro.html"><?php echo __( 'UPGRADE TO PRO VERSION','video-grid');?></a>
-                                </h3>
-                            </span>
-                        </div>  
                     <h2><?php echo __( 'Add Video','video-grid');?></h2>
                    <?php } ?>
                      <br />
@@ -1414,6 +1564,11 @@ function video_grid_with_lightbox_video_management_func() {
                                                                     <div>
                                                                             <input type="radio" value="youtube" name="vtype" <?php if($vtype=='youtube'): ?> checked='checked' <?php endif;?> style="width: 15px" id="type_youtube" /><?php echo __( 'Youtube','video-grid');?>&nbsp;&nbsp;
                                                                             <input <?php if($vtype=='dailymotion'): ?> checked='checked' <?php endif;?> type="radio" value="dailymotion" name="vtype" style="width: 15px" id="type_DailyMotion" /><?php echo __( 'DailyMotion','video-grid');?>&nbsp;&nbsp;
+                                                                            <input <?php if($vtype=='vimeo'): ?> checked='checked' <?php endif;?> type="radio" value="vimeo" name="vtype" style="width: 15px" id="type_Vimeo" /><?php echo __( 'Vimeo','video-grid');?>&nbsp;&nbsp;
+                                                                            <span style="display:inline-block;margin-left:6px;color:#999;" title="<?php echo esc_attr__('Available in the Pro version','video-grid'); ?>">
+                                                                                <input type="radio" disabled="disabled" style="width: 15px" /><?php echo __( 'HTML5 Video','video-grid');?>
+                                                                                <a href="https://www.i13websolution.com/product/wordpress-responsive-video-grid-pro/" target="_blank" rel="noopener" style="text-decoration:none;color:#f0a500;font-weight:700;font-size:11px;">(<?php echo __('Pro','video-grid'); ?>)</a>
+                                                                            </span>
                                                                     </div>
                                                                     <div style="clear: both"></div>
                                                                     <div></div>
@@ -1647,6 +1802,38 @@ function video_grid_with_lightbox_video_management_func() {
                                                                                      jQuery("#loading_img").hide();
                                                                             }          
 
+                                                                            else if(checkedValueRadio == 'vimeo'){
+
+                                                                                    var vN = videourlVal.lastIndexOf('/');
+                                                                                    var vimeoVid = videourlVal.substring(vN + 1);
+                                                                                    var VimeoJsonUri = 'https://vimeo.com/api/v2/video/' + vimeoVid + '.json';
+                                                                                    jQuery.getJSON(VimeoJsonUri, function(data) {
+                                                                                            if (typeof data == 'object'){
+                                                                                                if (typeof data[0] == 'object'){
+                                                                                                    if (data[0].title != ''){
+                                                                                                        jQuery("#videotitle").val(data[0].title);
+                                                                                                    }
+                                                                                                    jQuery("#videotitleurl").val(videourlVal);
+                                                                                                    if (data[0].description != ''){
+                                                                                                        jQuery("#video_description").val(data[0].description);
+                                                                                                    }
+                                                                                                    jQuery("#img_disp").attr('src', data[0].thumbnail_large);
+                                                                                                    jQuery("#HdnMediaSelection").val(data[0].thumbnail_large);
+                                                                                                    jQuery("#loading_img").hide();
+                                                                                                }
+                                                                                                else{
+                                                                                                    alert('Could not fetch Vimeo video info. Please check the URL.');
+                                                                                                }
+                                                                                            }
+                                                                                            jQuery("#loading_img").hide();
+                                                                                    }).fail(function(){
+                                                                                            alert('Could not fetch Vimeo video info. Please check the URL.');
+                                                                                            jQuery("#loading_img").hide();
+                                                                                    });
+
+                                                                                     jQuery("#loading_img").hide();
+                                                                            }
+
                                                                             jQuery("#loading_img").hide();
                                                                         }
 
@@ -1872,30 +2059,7 @@ function video_grid_with_lightbox_video_management_func() {
           </div>
           </div>     
                     <div id="postbox-container-1" class="postbox-container" > 
-
-                 <div class="postbox"> 
-                     <h3 class="hndle"><span></span><?php echo __( 'Access All Themes In One Price','video-grid');?></h3> 
-                     <div class="inside">
-                         <center><a href="http://www.elegantthemes.com/affiliates/idevaffiliate.php?id=11715_0_1_10" target="_blank">
-                                 <img border="0" src="<?php echo plugins_url( 'images/300x250.gif', __FILE__ );?>" width="250" height="250">
-                             </a></center>
-
-                         <div style="margin:10px 5px">
-
-                         </div>
-                     </div></div>
-                  <div class="postbox"> 
-                    <h3 class="hndle"><span></span><?php echo __('Google For Business Coupon','video-grid');?></h3> 
-                        <div class="inside">
-                            <center><a href="https://goo.gl/OJBuHT" target="_blank">
-                                    <img src="<?php echo plugins_url( 'images/g-suite-promo-code-4.png', __FILE__ );?>" width="250" height="250" border="0">
-                                </a></center>
-                            <div style="margin:10px 5px">
-                            </div>
-                        </div>
-
-                    </div>
-
+                 <?php rvg_free_pro_sidebar_box(); ?>
              </div> 
          </div>
      </div>                 
@@ -2139,7 +2303,14 @@ function video_grid_with_lightbox_video_preview_func() {
 
                                             <div class="wrap_grid"  id="<?php echo $rand_Num_td; ?>">
 						 <div id="<?php echo $rand_Numb; ?>" class="responsivegrid" style="margin-top: 2px !important;">
-                                                     <div class="box_parent">   
+                                                     <?php
+                                                     $vg_tmw = (is_array($vg_front_settings) && isset($vg_front_settings['thumb_min_width'])) ? intval($vg_front_settings['thumb_min_width']) : 260;
+                                                     $vg_tmh = (is_array($vg_front_settings) && isset($vg_front_settings['thumb_min_height'])) ? intval($vg_front_settings['thumb_min_height']) : 160;
+                                                     if ($vg_tmw < 80) { $vg_tmw = 80; }
+                                                     if ($vg_tmh < 60) { $vg_tmh = 60; }
+                                                     $vg_modern_style = ($vg_grid_engine === 'modern') ? 'style="--rvg-min-col:'.$vg_tmw.'px; --rvg-min-h:'.$vg_tmh.'px;"' : '';
+                                                     ?>
+                                                     <div class="box_parent <?php echo ($vg_grid_engine === 'modern') ? 'rvg-modern-grid' : ''; ?>" <?php echo $vg_modern_style; ?>>   
                                                     <?php
                                                             global $wpdb;
                                                              $imageheight = 270;
@@ -2372,6 +2543,20 @@ function print_responsive_video_grid_func($atts) {
         wp_enqueue_script('jquery');     
         wp_enqueue_script('vl-grid-js');    
         wp_enqueue_script('v_grid');    
+
+        // Choose lightbox engine. Existing sites (setting absent) keep the legacy
+        // FancyBox engine so nothing changes for them; new installs default to modern.
+        $vg_front_settings = get_option('responsive_video_grid_settings');
+        $vg_lightbox_engine = (is_array($vg_front_settings) && isset($vg_front_settings['lightbox_engine'])) ? $vg_front_settings['lightbox_engine'] : 'legacy';
+        if ($vg_lightbox_engine === 'modern') {
+            wp_enqueue_style('rvg-lightbox-css');
+            wp_enqueue_script('rvg-lightbox-js');
+        }
+        // Grid layout engine (same safe default: legacy for existing, modern for new).
+        $vg_grid_engine = (is_array($vg_front_settings) && isset($vg_front_settings['grid_engine'])) ? $vg_front_settings['grid_engine'] : 'legacy';
+        if ($vg_grid_engine === 'modern') {
+            wp_enqueue_style('rvg-modern-grid-css');
+        }
       
         ob_start();
 
@@ -2421,7 +2606,14 @@ function print_responsive_video_grid_func($atts) {
                                  <div style="width: auto; postion: relative" id="<?php echo $rand_Num_td; ?>">
                                      
                                       <div id="<?php echo $rand_Numb; ?>" class="wrap_grid" style="margin-top: 2px !important;">
-                                          <div class="box_parent">     
+                                          <?php
+                                          $vg_tmw = (is_array($vg_front_settings) && isset($vg_front_settings['thumb_min_width'])) ? intval($vg_front_settings['thumb_min_width']) : 260;
+                                          $vg_tmh = (is_array($vg_front_settings) && isset($vg_front_settings['thumb_min_height'])) ? intval($vg_front_settings['thumb_min_height']) : 160;
+                                          if ($vg_tmw < 80) { $vg_tmw = 80; }
+                                          if ($vg_tmh < 60) { $vg_tmh = 60; }
+                                          $vg_modern_style = ($vg_grid_engine === 'modern') ? 'style="--rvg-min-col:'.$vg_tmw.'px; --rvg-min-h:'.$vg_tmh.'px;"' : '';
+                                          ?>
+                                          <div class="box_parent <?php echo ($vg_grid_engine === 'modern') ? 'rvg-modern-grid' : ''; ?>" <?php echo $vg_modern_style; ?>>     
                                             <?php
                                                         global $wpdb;
                                                         $imageheight = 270;
@@ -2578,7 +2770,14 @@ function print_responsive_video_grid_func($atts) {
                                     var uniqObj=jQuery("a[rel='<?php echo $randOmeRel;?>']");
 
 
+                                    <?php if ($vg_grid_engine !== 'modern'): ?>
                                     videoPlacements('<?php echo $rand_Numb; ?>',jQuery);
+                                    <?php endif; ?>
+                                    <?php if ($vg_lightbox_engine === 'modern'): ?>
+                                    if (typeof RVGLightbox !== 'undefined') {
+                                        RVGLightbox.initGallery("#<?php echo $rand_Numb; ?> .video_lbox", false);
+                                    }
+                                    <?php else: ?>
                                     jQuery(".video_lbox").fancybox_vg({
                                     'type'    : "iframe",
                                     'overlayColor':'#000000',
@@ -2608,6 +2807,7 @@ function print_responsive_video_grid_func($atts) {
                                            }
 
                                         });
+                                    <?php endif; ?>
 
 
                                     var width__ = jQuery(window).width();
@@ -2619,7 +2819,9 @@ function print_responsive_video_grid_func($atts) {
                                             timer__ && clearTimeout(timer__);
                                             timer__ = setTimeout(function(){ 
 
+                                            <?php if ($vg_grid_engine !== 'modern'): ?>
                                             videoPlacements('<?php echo $rand_Numb; ?>',jQuery);
+                                            <?php endif; ?>
 
                                             }, 200);
 
